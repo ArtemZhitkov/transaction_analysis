@@ -46,9 +46,7 @@ def report_to_file(filename: str = "function_operation_report.txt") -> Callable:
 
 
 @report_to_file()
-def spending_by_category(transactions: pd.DataFrame,
-                         category: str,
-                         date: Optional[Any] = None) -> str | None:
+def spending_by_category(transactions: pd.DataFrame, category: str, date: Optional[Any] = None) -> str | None:
     """Функция принимает на вход: датафрейм с транзакциями,
                                   название категории,
                                   опциональную дату.
@@ -73,4 +71,4 @@ def spending_by_category(transactions: pd.DataFrame,
     except Exception as e:
         logger.error(f"Произошла ошибка: {e}")
         print(f"Произошла ошибка: {e}")
-        return None
+        return ""
