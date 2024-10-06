@@ -1,3 +1,4 @@
+from typing import Iterator
 from unittest.mock import patch
 
 import pandas as pd
@@ -5,13 +6,13 @@ import pytest
 
 
 @pytest.fixture
-def sample_excel_file():
+def sample_excel_file() -> str:
     return "test_data.xlsx"
 
 
 @pytest.fixture
-def mock_logger():
-    with patch('src.utils.logger') as mock_logger:
+def mock_logger() -> Iterator:
+    with patch("src.utils.logger") as mock_logger:
         yield mock_logger
 
 
@@ -46,7 +47,7 @@ def test_df_not_cashback() -> pd.DataFrame:
 
 @pytest.fixture
 def test_empty_df() -> pd.DataFrame:
-    transactions = [{}]
+    transactions: list = [{}]
     return pd.DataFrame(transactions)
 
 
@@ -91,3 +92,14 @@ def test_df_top_5() -> pd.DataFrame:
         },
     ]
     return pd.DataFrame(transactions)
+
+
+@pytest.fixture
+def transactions_df() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "Дата операции": ["01.03.2024 12:00:00", "02.04.2024 13:30:00", "03.05.2024 14:15:00"],
+            "Категория": ["Продукты", "Продукты", "Транспорт"],
+            "Сумма": [100, 200, 50],
+        }
+    )
