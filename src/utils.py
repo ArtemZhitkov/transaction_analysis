@@ -20,7 +20,7 @@ logger.addHandler(file_handler)
 
 def read_data_from_excel(path: str) -> pd.DataFrame:
     """Функция принимает на вход путь до excel-файла
-    и возвращает список словарей с банковскими операциями."""
+    и возвращает датафрейм с банковскими операциями."""
     try:
         transactions_df = pd.read_excel(path)
         logger.info(f"Чтение данных из файла: {path}")
@@ -52,7 +52,7 @@ def greeting(date: str) -> str:
         return "Добрый вечер"
 
 
-def card_information(transactions_df: pd.DataFrame) -> dict:
+def card_information(transactions_df: pd.DataFrame) -> list[dict]:
     """Функция принимает на вход DataFrame c финансовыми операциями и
     выводит информацию по каждой карте:
     последние 4 цифры карты;
@@ -61,10 +61,9 @@ def card_information(transactions_df: pd.DataFrame) -> dict:
     logger.info("Преобразование DataFrame в список словарей")
     transactions = transactions_df.to_dict(orient="records")
     card_info = {}
-    logger.info("Сортировка по номерам карт,подсчет суммы платежей и кэшбека")
+    logger.info("Сортировка по номерам карт,подсчет суммы платежей и кэшбэка")
     for transaction in transactions:
         card_number = transaction.get("Номер карты")
-        # если поле номер карты None, операцию пропускаем
         if not card_number or str(card_number).strip().lower() == "nan":
             continue
         amount = float(transaction["Сумма операции"])
@@ -73,9 +72,9 @@ def card_information(transactions_df: pd.DataFrame) -> dict:
         if amount < 0:
             card_info[card_number]["total_spent"] += abs(amount)
             cashback_value = transaction.get("Кэшбэк")
-            # убираем категории переводы и наличные т.к. с них кэшбека не будет
+            # убираем категории переводы и наличные т.к. с них кэшбэка не будет
             if transaction["Категория"] != "Переводы" and transaction["Категория"] != "Наличные":
-                # рассчитываем кэшбек как 1% от траты, но если поле кэшбек содержит сумму просто ее добавляем
+                # рассчитываем кэшбэк как 1% от траты, но если поле кэшбэк содержит сумму просто ее добавляем
                 if cashback_value is not None:
                     cashback_amount = float(cashback_value)
                     if cashback_amount >= 0:
@@ -84,20 +83,38 @@ def card_information(transactions_df: pd.DataFrame) -> dict:
                         card_info[card_number]["cashback"] += amount * -0.01
                 else:
                     card_info[card_number]["cashback"] += amount * -0.01
-    logger.info("Сортировка по номерам карт,подсчет суммы платежей и кэшбека - выполнена")
-    return card_info
+    cards_data = []
+    for last_digits, data in card_info.items():
+        cards_data.append(
+            {
+                "last_digits": last_digits,
+                "total_spent": round(data["total_spent"], 2),
+                "cashback": round(data["cashback"], 2),
+            }
+        )
+    logger.info("получен словарь по тратам и кэшбэку по каждой карте")
+    return cards_data
 
 
 def top_transactions(transactions_df: pd.DataFrame) -> list[dict[Hashable, Any]]:
     """Функция принимает на вход датафрейм с транзакциями, сортирует и выводит топ-5 транзакций по сумме платежа"""
-    logger.info("Сортировка транзакций по сумме платежа")
-    transactions_df.sort_values(by="Сумма платежа", inplace=True, ascending=False, key=lambda x: abs(x))
-    logger.info("Сортировка выполнена")
-    result = transactions_df.loc[:5, ["Дата операции", "Сумма платежа", "Категория", "Описание"]].to_dict(
-        orient="records"
-    )
-    logger.info("Возврат топ-5 транзакций")
-    return result[:5]
+    try:
+        logger.info("Сортировка транзакций по сумме платежа")
+        transactions_df = transactions_df.sort_values(by="Сумма платежа", ascending=False, key=lambda x: abs(x))
+        # Выбор топ-5 транзакций
+        top_5_transactions = transactions_df.head(5).to_dict('records')
+        # Преобразование результатов в список словарей
+        result = []
+        for transaction in top_5_transactions:
+            operation = {"date": transaction.get("Дата операции"), "amount": transaction.get("Сумма платежа"),
+                         "category": transaction.get("Категория"), "description": transaction.get("Описание")}
+            result.append(operation)
+        logger.info("Выполнение сортировки транзакций по сумме платежа завершено")
+
+        return result
+    except Exception as e:
+        logger.error(f"Произошла ошибка {e}")
+        return []
 
 
 def get_currency_rates(currencies: list[str], api_key: Any) -> list[dict]:
