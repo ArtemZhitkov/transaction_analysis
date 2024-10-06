@@ -1,7 +1,7 @@
 import logging
 import os
 from datetime import datetime
-from typing import Any, Hashable
+from typing import Any
 
 import pandas as pd
 import requests
@@ -36,7 +36,7 @@ def read_data_from_excel(path: str) -> pd.DataFrame:
 def greeting(date: str) -> str:
     """Приветствие в формате "???", где ??? — «Доброе утро» /
     «Добрый день» / «Добрый вечер» / «Доброй ночи» в зависимости от текущего времени."""
-    now = datetime.strptime(date, "%d.%m.%Y %H:%M:%S")
+    now = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
     current_hour = now.hour
     if 0 <= current_hour < 6:
         logger.info("Приветствие: 'Доброй ночи'")
@@ -96,7 +96,7 @@ def card_information(transactions_df: pd.DataFrame) -> list[dict]:
     return cards_data
 
 
-def top_transactions(transactions_df: pd.DataFrame) -> list[dict[Hashable, Any]]:
+def top_transactions(transactions_df: pd.DataFrame) -> list[dict[str, Any | None]]:
     """Функция принимает на вход датафрейм с транзакциями, сортирует и выводит топ-5 транзакций по сумме платежа"""
     try:
         logger.info("Сортировка транзакций по сумме платежа")
