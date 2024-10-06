@@ -32,7 +32,7 @@ def transaction_analysis(data: pd.DataFrame, year: int, month: int) -> str | Non
                 category = transaction["Категория"]
                 amount = transaction["Сумма платежа"]
                 if amount < 0:
-                    cashback = transaction["Кэшбек"]
+                    cashback = transaction["Кэшбэк"]
                     if cashback is not None and cashback >= 0:
                         cashback = float(cashback)
                     else:
@@ -43,7 +43,7 @@ def transaction_analysis(data: pd.DataFrame, year: int, month: int) -> str | Non
                         cashback_analysis[category] = cashback
                 else:
                     continue
-        logger.info("Посчитана сумма кэшбека по категориям")
+        logger.info("Посчитана сумма кэшбэка по категориям")
         return json.dumps(cashback_analysis, ensure_ascii=False, indent=4)
     except Exception as e:
         logger.error(f"Произошла ошибка {e}")
