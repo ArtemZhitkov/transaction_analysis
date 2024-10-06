@@ -5,18 +5,16 @@ from typing import Any
 
 from dotenv import load_dotenv
 
-from src.utils import (
-    card_information,
-    get_currency_rates,
-    get_price_stocks,
-    greeting,
-    read_data_from_excel,
-    top_transactions,
-)
+from src.utils import (card_information, get_currency_rates, get_price_stocks, greeting, read_data_from_excel,
+                       top_transactions)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 rel_file_path = os.path.join(current_dir, "../logs/views.log")
 abs_file_path = os.path.abspath(rel_file_path)
+
+path_to_user_settings = os.path.join(current_dir, "../user_settings.json")
+abs_path_to_user_settings = os.path.abspath(path_to_user_settings)
+
 
 logger = logging.getLogger("views")
 logger.setLevel(logging.DEBUG)
@@ -26,7 +24,7 @@ file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 
 
-with open("../user_settings.json", "r") as file:
+with open(abs_path_to_user_settings, "r") as file:
     logger.info(f"Чтение файла {file}")
     user_choice = json.load(file)
 
